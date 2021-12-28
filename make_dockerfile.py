@@ -240,7 +240,7 @@ RUN \\
     unp \\
     libbz2-dev \\
     liblzma-dev \\
-    zlib1g-dev \\ 
+    zlib1g-dev \\
     # OpenMPI support
     libopenmpi-dev \\
     openmpi-bin \\
@@ -537,7 +537,7 @@ RUN \\
     wget https://github.com/tsl0922/ttyd/archive/refs/tags/1.6.2.zip \\
     && unzip 1.6.2.zip \\
     && cd ttyd-1.6.2 \\
-    && mkdir build \\ 
+    && mkdir build \\
     && cd build \\
     && cmake .. \\
     && make \\
@@ -549,7 +549,7 @@ RUN \\
 ENV WORKSPACE_HOME="/workspace"
 RUN \\
     if [ -e $WORKSPACE_HOME ] ; then \\
-    chmod a+rwx $WORKSPACE_HOME; \\   
+    chmod a+rwx $WORKSPACE_HOME; \\
     else \\
     mkdir $WORKSPACE_HOME && chmod a+rwx $WORKSPACE_HOME; \\
     fi
@@ -557,6 +557,13 @@ ENV HOME=$WORKSPACE_HOME
 WORKDIR $WORKSPACE_HOME
 """
 
+def start_shell() -> str:
+    return """\
+### Start Ainize Worksapce ###
+COPY start.sh /scripts/start.sh
+RUN ["chmod", "+x", "/scripts/start.sh"]
+CMD "/scripts/start.sh"
+"""
 
 def main(args: Namespace):
     dockerfile = ''
@@ -568,6 +575,8 @@ def main(args: Namespace):
     dockerfile += python_string(args.miniconda_version, args.python_version)
     # Dev Tools
     dockerfile += dev_tools()
+    # Start shell
+    dockerfile += start_shell()
     with open('Dockerfile', 'w') as f:
         f.write(dockerfile)
 
