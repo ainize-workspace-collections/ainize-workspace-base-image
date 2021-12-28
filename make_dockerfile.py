@@ -50,7 +50,7 @@ def define_arg_parser() -> Namespace:
     parser.add_argument(
         "--cuda_version",
         choices=list(CUDA_INFO_DICT.keys()),
-        required=True,
+        default="11.3.1",
         help="cuda version"
     )
     parser.add_argument(
@@ -598,7 +598,7 @@ def main(args: Namespace):
         print('Build :', build_command)
         with Popen(build_command, shell=True) as p:
             try:
-                result = p.wait()
+                p.wait()
                 build_flag = True
             except:
                 p.kill()
@@ -609,7 +609,7 @@ def main(args: Namespace):
             print('Push :', push_command)
             with Popen(push_command, shell=True) as p:
                 try:
-                    result = p.wait()
+                    p.wait()
                 except:
                     p.kill()
                     p.wait()
