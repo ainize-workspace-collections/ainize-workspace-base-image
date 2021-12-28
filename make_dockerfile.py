@@ -557,6 +557,7 @@ ENV HOME=$WORKSPACE_HOME
 WORKDIR $WORKSPACE_HOME
 """
 
+
 def start_shell() -> str:
     return """\
 ### Start Ainize Worksapce ###
@@ -564,6 +565,7 @@ COPY start.sh /scripts/start.sh
 RUN ["chmod", "+x", "/scripts/start.sh"]
 CMD "/scripts/start.sh"
 """
+
 
 def main(args: Namespace):
     dockerfile = ''
