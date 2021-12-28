@@ -1,10 +1,6 @@
 import argparse
 from argparse import Namespace
 
-CUDA_VERSION_LIST = [
-    "11.3.1",
-]
-
 MINICONDA_INFO_DICT = {
     "4.10.3": {
         "37": "9f186c1d86c266acc47dbc1603f0e2ed",
@@ -52,7 +48,7 @@ def define_arg_parser() -> Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--cuda_version",
-        choices=CUDA_VERSION_LIST,
+        choices=list(CUDA_INFO_DICT.keys()),
         required=True,
         help="cuda version"
     )
