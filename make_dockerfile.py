@@ -343,7 +343,7 @@ def cuda_string(cuda_version: str) -> str:
     ret += f"""\
 ### CUDA BASE ###
 # https://gitlab.com/nvidia/container-images/cuda/-/blob/master/dist/{CUDA_VERSION}/ubuntu2004/base/Dockerfile
-ENV NVIDIA_REQUIRE_CUDA "f{NVIDIA_REQUIRE_CUDA}"
+ENV NVIDIA_REQUIRE_CUDA "{NVIDIA_REQUIRE_CUDA}"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \\
     gnupg2 curl ca-certificates && \\
