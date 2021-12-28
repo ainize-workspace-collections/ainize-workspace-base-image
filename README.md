@@ -1,0 +1,1 @@
+# ainize-workspace-base-image
