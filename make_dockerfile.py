@@ -527,7 +527,7 @@ def dev_tools() -> str:
 
 ## Install Jupyter Notebook
 RUN \\
-    pip install notebook voila ipywidgets jupyter_contrib_nbextensions autopep8 yapf && \\
+    conda install -c conda-forge jupyterlab notebook voila jupyter_contrib_nbextensions ipywidgets autopep8 yapf && \\
     # Activate and configure extensions
     jupyter contrib nbextension install --sys-prefix && \\
     clean-layer.sh
