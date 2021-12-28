@@ -1,5 +1,6 @@
 import argparse
 from argparse import Namespace
+from subprocess import Popen
 
 MINICONDA_INFO_DICT = {
     "4.10.3": {
@@ -62,6 +63,16 @@ def define_arg_parser() -> Namespace:
         "--python_version",
         default="3.8",
         help="python version"
+    )
+    parser.add_argument(
+        "--docker",
+        action="store_true",
+        help="build and push docker"
+    )
+    parser.add_argument(
+        "--tag_name",
+        default="ainize-workspace-base",
+        help="image tag"
     )
     return parser.parse_args()
 
@@ -581,6 +592,29 @@ def main(args: Namespace):
     dockerfile += start_shell()
     with open('Dockerfile', 'w') as f:
         f.write(dockerfile)
+    if args.docker:
+        build_command = f"docker build -t {args.tag_name} ."
+        build_flag = False
+        print('Build :', build_command)
+        with Popen(build_command, shell=True) as p:
+            try:
+                result = p.wait()
+                build_flag = True
+            except:
+                p.kill()
+                p.wait()
+
+        if build_flag:
+            push_command = f"docker push {args.tag_name}"
+            print('Push :', push_command)
+            with Popen(push_command, shell=True) as p:
+                try:
+                    result = p.wait()
+                except:
+                    p.kill()
+                    p.wait()
+
+
 
 
 if __name__ == '__main__':
