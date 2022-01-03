@@ -350,7 +350,7 @@ ENV \\
     CONDA_VERSION={MINICONDA_VERSION}
 
 RUN wget --no-verbose https://repo.anaconda.com/miniconda/Miniconda3-py{PYTHON_INFO}_${{CONDA_VERSION}}-Linux-x86_64.sh -O ~/miniconda.sh && \\
-    echo "${MINICONDA_MD5} *miniconda.sh" | md5sum -c - && \\
+    echo "${{MINICONDA_MD5}} *miniconda.sh" | md5sum -c - && \\
     /bin/bash ~/miniconda.sh -b -p $CONDA_ROOT && \\
     export PATH=$CONDA_ROOT/bin:$PATH && \\
     rm ~/miniconda.sh && \\
