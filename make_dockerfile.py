@@ -45,7 +45,7 @@ def define_arg_parser() -> Namespace:
     )
     parser.add_argument(
         "--tag_name",
-        default="ainize-workspace-base",
+        default="",
         help="image tag"
     )
     return parser.parse_args()
@@ -100,6 +100,9 @@ def main(args: Namespace):
     with open('Dockerfile', 'w') as f:
         f.write(dockerfile)
     if args.docker:
+        if not args.tag_name:
+            print('[ERROR]: tag name is need')
+            exit(1)
         build_command = f"docker build -t {args.tag_name} ."
         build_flag = False
         print('Build :', build_command)
