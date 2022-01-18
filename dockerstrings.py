@@ -240,7 +240,7 @@ ENV CUDA_VERSION {CUDA_VERSION}
 RUN apt-get update && apt-get install -y --no-install-recommends \\
     cuda-cudart-{CUDA_DOT_VERSION}=${{NV_CUDA_CUDART_VERSION}} \\
     ${{NV_CUDA_COMPAT_PACKAGE}} \\
-    && ln -s cuda-{CUDA_DOT_VERSION}/usr/local/cuda && \\
+    && ln -s cuda-{CUDA_DOT_VERSION} /usr/local/cuda && \\
     rm -rf /var/lib/apt/lists/*
     
 # Required for nvidia-docker v1
