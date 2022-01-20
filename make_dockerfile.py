@@ -95,9 +95,12 @@ def main(args: Namespace):
         NV_CUDNN_VERSION=cuda_json["NV_CUDNN_VERSION"],
         NV_CUDNN_PACKAGE_NAME=cuda_json["NV_CUDNN_PACKAGE_NAME"],
     )
+    # Oh My zsh
+    dockerfile += dockerstrings.oh_my_szh
+    
     # Start shell
     dockerfile += dockerstrings.start_shell
-    dockerfile += dockerstrings.oh_my_szh
+    
 
     with open('Dockerfile', 'w') as f:
         f.write(dockerfile)
