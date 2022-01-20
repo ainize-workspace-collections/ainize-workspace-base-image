@@ -97,8 +97,8 @@ def main(args: Namespace):
     )
     # Start shell
     dockerfile += dockerstrings.start_shell
-    dockerfile += dockerfile.oh_my_szh
-    
+    dockerfile += dockerstrings.oh_my_szh
+
     with open('Dockerfile', 'w') as f:
         f.write(dockerfile)
     if args.docker:

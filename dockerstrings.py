@@ -437,6 +437,7 @@ RUN \\
     conda init zsh && \\
     chsh -s $(which zsh) $NB_USER
 """
+
 start_shell = """\
 ### Start Ainize Worksapce ###
 COPY start.sh /scripts/start.sh
