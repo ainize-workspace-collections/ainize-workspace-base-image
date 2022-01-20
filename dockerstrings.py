@@ -428,6 +428,15 @@ ENV HOME=$WORKSPACE_HOME
 WORKDIR $WORKSPACE_HOME
 """
 
+oh_my_szh = """\
+### Install Oh-My-Zsh ###
+RUN \\
+    apt-get update --fix-missing && \\
+    apt-get install -y zsh  && \\
+    sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" && \\
+    conda init zsh && \\
+    chsh -s $(which zsh) $NB_USER
+"""
 start_shell = """\
 ### Start Ainize Worksapce ###
 COPY start.sh /scripts/start.sh

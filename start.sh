@@ -36,6 +36,6 @@ else
 TTYD_PASS="-c :$PASSWORD"
 fi
 # Do not change the port number 8020.
-ttyd -p 8020 $TTYD_PASS bash &
+ttyd -p 8020 $TTYD_PASS zsh &
 
 tail -f /dev/null
