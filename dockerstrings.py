@@ -433,7 +433,7 @@ oh_my_szh = """\
 RUN \\
     apt-get update --fix-missing && \\
     apt-get install -y zsh  && \\
-    sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" && \\
+    sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \\
     conda init zsh && \\
     chsh -s $(which zsh) $NB_USER
 """
