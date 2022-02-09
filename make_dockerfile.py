@@ -96,7 +96,8 @@ def main(args: Namespace):
         NV_CUDNN_PACKAGE_NAME=cuda_json["NV_CUDNN_PACKAGE_NAME"],
     )
     # Oh My zsh
-    dockerfile += dockerstrings.oh_my_szh
+    dockerfile += dockerstrings.oh_my_zsh
+    dockerfile += dockerstrings.oh_my_zsh_plugins
     
     # Start shell
     dockerfile += dockerstrings.start_shell

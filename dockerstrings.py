@@ -428,7 +428,7 @@ ENV HOME=$WORKSPACE_HOME
 WORKDIR $WORKSPACE_HOME
 """
 
-oh_my_szh = """\
+oh_my_zsh = """\
 ### Install Oh-My-Zsh ###
 RUN \\
     apt-get update --fix-missing && \\
@@ -438,6 +438,19 @@ RUN \\
     sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \\
     conda init zsh && \\
     chsh -s /usr/bin/zsh $NB_USER
+"""
+
+oh_my_zsh_plugins = """\
+### Add Oh My Zsh Plugins ###
+RUN \\
+    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions && \\
+    echo "source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" >> ~/.zshrc
+RUN \\
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting && \\
+    echo "source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ~/.zshrc
+RUN \\
+    git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search && \\
+    echo "source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh" >> ~/.zshrc
 """
 
 start_shell = """\
