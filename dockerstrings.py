@@ -432,10 +432,12 @@ oh_my_szh = """\
 ### Install Oh-My-Zsh ###
 RUN \\
     apt-get update --fix-missing && \\
-    apt-get install -y zsh  && \\
+    apt-get install -y zsh
+ENV SHELL /usr/bin/zsh
+RUN \\
     sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \\
     conda init zsh && \\
-    chsh -s $(which zsh) $NB_USER
+    chsh -s /usr/bin/zsh $NB_USER
 """
 
 start_shell = """\
