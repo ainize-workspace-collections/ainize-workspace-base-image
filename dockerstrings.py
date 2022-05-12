@@ -176,62 +176,56 @@ RUN apt-get update && apt-get install -y --no-install-recommends \\
     rm -rf /var/lib/apt/lists/*
 """
 
-miniconda = """
-### MINICONDA ###
-# Install Miniconda: https://repo.continuum.io/miniconda/
+python_mamba = """
+# Install Python (mamba)
 ENV \\
     CONDA_DIR=/opt/conda \\
-    CONDA_ROOT=/opt/conda \\
-    PYTHON_VERSION=\"{PYTHON_VERSION}\" \\
-    CONDA_PYTHON_DIR=/opt/conda/lib/python{PYTHON_VERSION} \\
-    MINICONDA_VERSION={MINICONDA_VERSION} \\
-    MINICONDA_MD5={MINICONDA_MD5} \\
-    CONDA_VERSION={MINICONDA_VERSION}
+    CONDA_ROOT=/opt/conda
+ENV PATH="${{CONDA_DIR}}/bin:${{PATH}}"
+ENV \\
+    PYTHON_VERSION={PYTHON_VERSION} \\
+    CONDA_MIRROR=https://github.com/conda-forge/miniforge/releases/latest/download
 
-RUN wget --no-verbose https://repo.anaconda.com/miniconda/Miniconda3-py{PYTHON_INFO}_${{CONDA_VERSION}}-Linux-x86_64.sh -O ~/miniconda.sh && \\
-    echo "${{MINICONDA_MD5}} *miniconda.sh" | md5sum -c - && \\
-    /bin/bash ~/miniconda.sh -b -p $CONDA_ROOT && \\
-    export PATH=$CONDA_ROOT/bin:$PATH && \\
-    rm ~/miniconda.sh && \\
-    # Update conda
-    $CONDA_ROOT/bin/conda update -y -n base conda && \\
-    $CONDA_ROOT/bin/conda install -y conda-build && \\
-    $CONDA_ROOT/bin/conda install -y --update-all python=$PYTHON_VERSION && \\
-    # Link Conda
-    ln -s $CONDA_ROOT/bin/python /usr/local/bin/python && \\
-    ln -s $CONDA_ROOT/bin/conda /usr/bin/conda && \\
-    # Update
-    $CONDA_ROOT/bin/conda install -y pip && \\
-    $CONDA_ROOT/bin/pip install --upgrade pip && \\
-    chmod -R a+rwx /usr/local/bin/ && \\
-    # Cleanup - Remove all here since conda is not in path as of now
-    $CONDA_ROOT/bin/conda clean -y --packages && \\
-    $CONDA_ROOT/bin/conda clean -y -a -f  && \\
-    $CONDA_ROOT/bin/conda build purge-all && \\
-    # Fix permissions
+RUN set -x && \\
+    # Miniforge installer
+    miniforge_arch=$(uname -m) && \\
+    miniforge_installer="Mambaforge-Linux-${{miniforge_arch}}.sh" && \\
+    wget --quiet "${{CONDA_MIRROR}}/${{miniforge_installer}}" && \\
+    /bin/bash "${{miniforge_installer}}" -f -b -p "${{CONDA_DIR}}" && \\
+    rm "${{miniforge_installer}}" && \\
+    # Conda configuration see https://conda.io/projects/conda/en/latest/configuration.html
+    conda config --system --set auto_update_conda false && \\
+    conda config --system --set show_channel_urls true && \\
+    if [[ "${{PYTHON_VERSION}}" != "default" ]]; then mamba install --quiet --yes python="${{PYTHON_VERSION}}"; fi && \\
+    # Pin major.minor version of python
+    mamba list python | grep '^python ' | tr -s ' ' | cut -d ' ' -f 1,2 >> "${{CONDA_DIR}}/conda-meta/pinned" && \\
+    # Using conda to update all packages: https://github.com/mamba-org/mamba/issues/1092
+    conda install -y conda-build && \\
+    conda update --all --quiet --yes && \\
+    conda clean --all -f -y && \\
     fix-permissions.sh $CONDA_ROOT && \\
     clean-layer.sh
-ENV PATH=$CONDA_ROOT/bin:$PATH
-### END MINICONDA ###
 """
 
 dev_tools = """\
-### DEV TOOLS ###
+# Install Dev Tools
 
-## Install Jupyter Notebook
-RUN \\
-    $CONDA_ROOT/bin/conda install -c conda-forge \\
-        jupyterlab notebook voila jupyter_contrib_nbextensions ipywidgets \\
-        autopep8 yapf && \\
-    # Activate and configure extensions
+## Install Jupyter
+RUN mamba install --quiet --yes \\
+    notebook \\
+    jupyterhub \\
+    jupyterlab \\
+    voila \\
+    jupyter_contrib_nbextensions \\
+    ipywidgets \\
+    autopep8 \\
+    yapf && \\
+    mamba clean --all -f -y && \\
+    npm cache clean --force && \\
     jupyter contrib nbextension install --sys-prefix && \\
-    # Cleanup
-    $CONDA_ROOT/bin/conda clean -y --packages && \\
-    $CONDA_ROOT/bin/conda clean -y -a -f  && \\
-    $CONDA_ROOT/bin/conda build purge-all && \\
+    fix-permissions.sh $CONDA_ROOT && \\
     clean-layer.sh
-
-## For Notebook Branding
+    
 COPY branding/logo.png /tmp/logo.png
 COPY branding/favicon.ico /tmp/favicon.ico
 RUN /bin/bash -c 'cp /tmp/logo.png $(python -c "import sys; print(sys.path[-1])")/notebook/static/base/images/logo.png'
@@ -254,8 +248,6 @@ RUN \\
     && make install
 
 ## Install ssh. (Not recommended to edit)
-
-### END DEV TOOLS ###
 
 # Make folders
 ENV WORKSPACE_HOME="/workspace"
