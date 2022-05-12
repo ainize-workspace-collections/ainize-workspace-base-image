@@ -10,6 +10,7 @@ from enums import PythonVersionEnum
 CUDA_INFO_DICT = {}
 
 def init_json():
+    global CUDA_INFO_DICT
     with open('./jsons/cuda.json', 'r') as f:
         CUDA_INFO_DICT = json.load(f)
 
