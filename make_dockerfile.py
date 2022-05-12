@@ -8,15 +8,10 @@ import dockerstrings
 from enums import PythonVersionEnum
 
 CUDA_INFO_DICT = {}
-MINICONDA_INFO_DICT = {}
-
 
 def init_json():
-    global CUDA_INFO_DICT, MINICONDA_INFO_DICT
     with open('./jsons/cuda.json', 'r') as f:
         CUDA_INFO_DICT = json.load(f)
-    with open('./jsons/miniconda.json', 'r') as f:
-        MINICONDA_INFO_DICT = json.load(f)
 
 
 def define_arg_parser() -> Namespace:
