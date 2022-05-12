@@ -38,4 +38,16 @@ fi
 # Do not change the port number 8020.
 ttyd -p 8020 $TTYD_PASS bash &
 
+# Do not change the port number 8030.
+sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/g' /etc/ssh/sshd_config
+sed -i 's/#Port 22/Port 8030/g' /etc/ssh/sshd_config
+
+if [ -z "$PASSWORD" ]
+then
+echo "root:$PASSWORD" | chpasswd
+else
+echo "root:1234qwer" | chpasswd
+fi
+service ssh start
+
 tail -f /dev/null
