@@ -55,18 +55,8 @@ def main(args: Namespace):
     dockerfile = ""
     # Basics
     dockerfile += dockerstrings.basic
-    # Miniconda
-    miniconda_json = MINICONDA_INFO_DICT[args.miniconda_version]
-    python_version_info = args.python_version.split('.')
-    python_info = f'{python_version_info[0]}{python_version_info[1]}'
-    dockerfile += dockerstrings.miniconda.format(
-        PYTHON_INFO=python_info,
-        PYTHON_VERSION=args.python_version,
-        MINICONDA_VERSION=args.miniconda_version,
-        MINICONDA_MD5=miniconda_json[python_info],
-    )
-    # Dev Tools
-    dockerfile += dockerstrings.dev_tools
+    # Ubuntu Package
+    dockerfile += dockerstrings.ubuntu_package
     # CUDA
     cuda_json = CUDA_INFO_DICT[args.cuda_version]
     dockerfile += dockerstrings.cuda.format(
@@ -95,6 +85,18 @@ def main(args: Namespace):
         NV_CUDNN_VERSION=cuda_json["NV_CUDNN_VERSION"],
         NV_CUDNN_PACKAGE_NAME=cuda_json["NV_CUDNN_PACKAGE_NAME"],
     )
+    # Miniconda
+    miniconda_json = MINICONDA_INFO_DICT[args.miniconda_version]
+    python_version_info = args.python_version.split('.')
+    python_info = f'{python_version_info[0]}{python_version_info[1]}'
+    dockerfile += dockerstrings.miniconda.format(
+        PYTHON_INFO=python_info,
+        PYTHON_VERSION=args.python_version,
+        MINICONDA_VERSION=args.miniconda_version,
+        MINICONDA_MD5=miniconda_json[python_info],
+    )
+    # Dev Tools
+    dockerfile += dockerstrings.dev_tools
     # Start shell
     dockerfile += dockerstrings.start_shell
     with open('Dockerfile', 'w') as f:
