@@ -72,7 +72,9 @@ ENV NVARCH x86_64
 ENV NV_CUDA_CUDART_VERSION {NV_CUDA_CUDART_VERSION}
 ENV NV_CUDA_COMPAT_PACKAGE {NV_CUDA_COMPAT_PACKAGE}
 
-RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/${{NVARCH}}/3bf863cc.pub | apt-key add - && \\
+RUN apt-get update && apt-get install -y --no-install-recommends \\
+    gnupg2 curl ca-certificates && \\
+    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/${{NVARCH}}/3bf863cc.pub | apt-key add - && \\
     echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/${{NVARCH}} /" > /etc/apt/sources.list.d/cuda.list && \\
     rm -rf /var/lib/apt/lists/*
     
