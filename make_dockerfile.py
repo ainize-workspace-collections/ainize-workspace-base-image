@@ -5,17 +5,14 @@ from argparse import Namespace
 from subprocess import Popen
 
 import dockerstrings
+from enums import PythonVersionEnum
 
 CUDA_INFO_DICT = {}
-MINICONDA_INFO_DICT = {}
-
 
 def init_json():
-    global CUDA_INFO_DICT, MINICONDA_INFO_DICT
+    global CUDA_INFO_DICT
     with open('./jsons/cuda.json', 'r') as f:
         CUDA_INFO_DICT = json.load(f)
-    with open('./jsons/miniconda.json', 'r') as f:
-        MINICONDA_INFO_DICT = json.load(f)
 
 
 def define_arg_parser() -> Namespace:
@@ -28,14 +25,9 @@ def define_arg_parser() -> Namespace:
         help="cuda version"
     )
     parser.add_argument(
-        "--miniconda_version",
-        choices=list(MINICONDA_INFO_DICT.keys()),
-        default="4.10.3",
-        help="miniconda version"
-    )
-    parser.add_argument(
         "--python_version",
-        default="3.8",
+        default=PythonVersionEnum.DEFAULT.value,
+        choices=[each.value for each in PythonVersionEnum],
         help="python version"
     )
     parser.add_argument(
@@ -55,18 +47,8 @@ def main(args: Namespace):
     dockerfile = ""
     # Basics
     dockerfile += dockerstrings.basic
-    # Miniconda
-    miniconda_json = MINICONDA_INFO_DICT[args.miniconda_version]
-    python_version_info = args.python_version.split('.')
-    python_info = f'{python_version_info[0]}{python_version_info[1]}'
-    dockerfile += dockerstrings.miniconda.format(
-        PYTHON_INFO=python_info,
-        PYTHON_VERSION=args.python_version,
-        MINICONDA_VERSION=args.miniconda_version,
-        MINICONDA_MD5=miniconda_json[python_info],
-    )
-    # Dev Tools
-    dockerfile += dockerstrings.dev_tools
+    # Ubuntu Package
+    dockerfile += dockerstrings.ubuntu_package
     # CUDA
     cuda_json = CUDA_INFO_DICT[args.cuda_version]
     dockerfile += dockerstrings.cuda.format(
@@ -95,6 +77,10 @@ def main(args: Namespace):
         NV_CUDNN_VERSION=cuda_json["NV_CUDNN_VERSION"],
         NV_CUDNN_PACKAGE_NAME=cuda_json["NV_CUDNN_PACKAGE_NAME"],
     )
+    # Python Mamba
+    dockerfile += dockerstrings.python_mamba.format(PYTHON_VERSION=args.python_version)
+    # Dev Tools
+    dockerfile += dockerstrings.dev_tools
     # Start shell
     dockerfile += dockerstrings.start_shell
     with open('Dockerfile', 'w') as f:
