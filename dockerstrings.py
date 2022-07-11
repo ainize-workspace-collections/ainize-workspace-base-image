@@ -1,5 +1,5 @@
 basic = """\
-FROM ubuntu:20.04
+FROM {DOCKER_BASE_IMAGE}
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 USER root
@@ -7,7 +7,7 @@ USER root
 ENV \\
     NB_USER=root \\
     SHELL=/bin/bash \\
-    HOME="/${NB_USER}" \\
+    HOME="/${{NB_USER}}" \\
     USER_GID=0 \\
     DISPLAY=:1 \\
     TERM=xterm \\
@@ -62,118 +62,6 @@ ENV \\
     LC_ALL=en_US.UTF-8 \\
     LANG=en_US.UTF-8 \\
     LANGUAGE=en_US.UTF-8
-"""
-
-cuda = """\
-# Instal CUDA Package
-## CUDA Base
-# https://gitlab.com/nvidia/container-images/cuda/-/blob/master/dist/{CUDA_VERSION}/ubuntu2004/base/Dockerfile
-ENV NVARCH x86_64
-ENV NV_CUDA_CUDART_VERSION {NV_CUDA_CUDART_VERSION}
-ENV NV_CUDA_COMPAT_PACKAGE {NV_CUDA_COMPAT_PACKAGE}
-
-RUN apt-get update && apt-get install -y --no-install-recommends \\
-    gnupg2 curl ca-certificates && \\
-    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/${{NVARCH}}/3bf863cc.pub | apt-key add - && \\
-    echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/${{NVARCH}} /" > /etc/apt/sources.list.d/cuda.list && \\
-    rm -rf /var/lib/apt/lists/*
-    
-ENV CUDA_VERSION {CUDA_VERSION}
-
-# For libraries in the cuda-compat-* package: https://docs.nvidia.com/cuda/eula/index.html#attachment-a
-RUN apt-get update && apt-get install -y --no-install-recommends \\
-    cuda-cudart-{CUDA_DOT_VERSION}=${{NV_CUDA_CUDART_VERSION}} \\
-    ${{NV_CUDA_COMPAT_PACKAGE}} \\
-    && ln -s cuda-{CUDA_DOT_VERSION} /usr/local/cuda && \\
-    rm -rf /var/lib/apt/lists/*
-    
-# Required for nvidia-docker v1
-RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \\
-    && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf
-
-ENV PATH /usr/local/nvidia/bin:/usr/local/cuda/bin:${{PATH}}
-ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
-
-# nvidia-container-runtime
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
-
-## CUDA RUNTIME
-ENV NV_CUDA_LIB_VERSION {NV_CUDA_LIB_VERSION}
-ENV NV_NVTX_VERSION {NV_NVTX_VERSION}
-ENV NV_LIBNPP_VERSION {NV_LIBNPP_VERSION}
-ENV NV_LIBNPP_PACKAGE libnpp-{CUDA_HYPHEN_VERSION}=${{NV_LIBNPP_VERSION}}
-ENV NV_LIBCUSPARSE_VERSION {NV_LIBCUSPARSE_VERSION}
-
-ENV NV_LIBCUBLAS_PACKAGE_NAME {NV_LIBCUBLAS_PACKAGE_NAME}
-ENV NV_LIBCUBLAS_VERSION {NV_LIBCUBLAS_VERSION}
-ENV NV_LIBCUBLAS_PACKAGE ${{NV_LIBCUBLAS_PACKAGE_NAME}}=${{NV_LIBCUBLAS_VERSION}}
-
-ENV NV_LIBNCCL_PACKAGE_NAME {NV_LIBNCCL_PACKAGE_NAME}
-ENV NV_LIBNCCL_PACKAGE_VERSION {NV_LIBNCCL_PACKAGE_VERSION}
-ENV NCCL_VERSION {NCCL_VERSION}
-ENV NV_LIBNCCL_PACKAGE ${{NV_LIBNCCL_PACKAGE_NAME}}=${{NV_LIBNCCL_PACKAGE_VERSION}}+cuda{CUDA_DOT_VERSION}
-
-RUN apt-get update && apt-get install -y --no-install-recommends \\
-    cuda-libraries-{CUDA_HYPHEN_VERSION}=${{NV_CUDA_LIB_VERSION}} \\
-    ${{NV_LIBNPP_PACKAGE}} \\
-    cuda-nvtx-{CUDA_HYPHEN_VERSION}=${{NV_NVTX_VERSION}} \\
-    libcusparse-{CUDA_HYPHEN_VERSION}=${{NV_LIBCUSPARSE_VERSION}} \\
-    ${{NV_LIBCUBLAS_PACKAGE}} \\
-    ${{NV_LIBNCCL_PACKAGE}} \\
-    && rm -rf /var/lib/apt/lists/*
-
-# Keep apt from auto upgrading the cublas and nccl packages. See https://gitlab.com/nvidia/container-images/cuda/-/issues/88
-RUN apt-mark hold ${{NV_LIBCUBLAS_PACKAGE_NAME}} ${{NV_LIBNCCL_PACKAGE_NAME}}
-
-## CUDA DEVEL
-ENV NV_CUDA_LIB_VERSION \"{NV_CUDA_LIB_VERSION}\"
-
-ENV NV_CUDA_CUDART_DEV_VERSION {NV_CUDA_CUDART_DEV_VERSION}
-ENV NV_NVML_DEV_VERSION {NV_NVML_DEV_VERSION}
-ENV NV_LIBCUSPARSE_DEV_VERSION {NV_LIBCUSPARSE_DEV_VERSION}
-ENV NV_LIBNPP_DEV_VERSION {NV_LIBNPP_DEV_VERSION}
-ENV NV_LIBNPP_DEV_PACKAGE libnpp-dev-{CUDA_HYPHEN_VERSION}=${{NV_LIBNPP_DEV_VERSION}}
-
-ENV NV_LIBCUBLAS_DEV_VERSION {NV_LIBCUBLAS_DEV_VERSION}
-ENV NV_LIBCUBLAS_DEV_PACKAGE_NAME {NV_LIBCUBLAS_DEV_PACKAGE_NAME}
-ENV NV_LIBCUBLAS_DEV_PACKAGE ${{NV_LIBCUBLAS_DEV_PACKAGE_NAME}}=${{NV_LIBCUBLAS_DEV_VERSION}}
-
-ENV NV_LIBNCCL_DEV_PACKAGE_NAME {NV_LIBNCCL_DEV_PACKAGE_NAME}
-ENV NV_LIBNCCL_DEV_PACKAGE_VERSION {NV_LIBNCCL_DEV_PACKAGE_VERSION}
-ENV NCCL_VERSION {NCCL_VERSION}
-ENV NV_LIBNCCL_DEV_PACKAGE ${{NV_LIBNCCL_DEV_PACKAGE_NAME}}=${{NV_LIBNCCL_DEV_PACKAGE_VERSION}}+cuda{CUDA_DOT_VERSION}
-
-RUN apt-get update && apt-get install -y --no-install-recommends \\
-    libtinfo5 libncursesw5 \\
-    cuda-cudart-dev-{CUDA_HYPHEN_VERSION}=${{NV_CUDA_CUDART_DEV_VERSION}} \\
-    cuda-command-line-tools-{CUDA_HYPHEN_VERSION}=${{NV_CUDA_LIB_VERSION}} \\
-    cuda-minimal-build-{CUDA_HYPHEN_VERSION}=${{NV_CUDA_LIB_VERSION}} \\
-    cuda-libraries-dev-{CUDA_HYPHEN_VERSION}=${{NV_CUDA_LIB_VERSION}} \\
-    cuda-nvml-dev-{CUDA_HYPHEN_VERSION}=${{NV_NVML_DEV_VERSION}} \\
-    ${{NV_LIBNPP_DEV_PACKAGE}} \\
-    libcusparse-dev-{CUDA_HYPHEN_VERSION}=${{NV_LIBCUSPARSE_DEV_VERSION}} \\
-    ${{NV_LIBCUBLAS_DEV_PACKAGE}} \\
-    ${{NV_LIBNCCL_DEV_PACKAGE}} \\
-    && rm -rf /var/lib/apt/lists/*
-
-# Keep apt from auto upgrading the cublas and nccl packages. See https://gitlab.com/nvidia/container-images/cuda/-/issues/88
-RUN apt-mark hold ${{NV_LIBCUBLAS_DEV_PACKAGE_NAME}} ${{NV_LIBNCCL_DEV_PACKAGE_NAME}}
-
-ENV LIBRARY_PATH /usr/local/cuda/lib64/stubs
-
-## CUDA DEVEL CUDNN8
-ENV NV_CUDNN_VERSION {NV_CUDNN_VERSION}
-
-ENV NV_CUDNN_PACKAGE \"libcudnn8=$NV_CUDNN_VERSION-1+cuda{CUDA_DOT_VERSION}\"
-ENV NV_CUDNN_PACKAGE_DEV \"libcudnn8-dev=$NV_CUDNN_VERSION-1+cuda{CUDA_DOT_VERSION}\"
-ENV NV_CUDNN_PACKAGE_NAME \"libcudnn8\"
-
-RUN apt-get update && apt-get install -y --no-install-recommends \\
-    ${{NV_CUDNN_PACKAGE}} \\
-    ${{NV_CUDNN_PACKAGE_DEV}} \\
-    && apt-mark hold ${{NV_CUDNN_PACKAGE_NAME}} && \\
-    rm -rf /var/lib/apt/lists/*
 """
 
 python_mamba = """
