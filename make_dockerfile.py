@@ -53,7 +53,7 @@ def main(args: Namespace):
         cudnn_info = f"cudnn{args.cudnn_version}"
         cuda_info = args.cuda_version
         dockerfile += dockerstrings.basic.format(
-            DOCKER_BASE_IMAGE=f"{cuda_info}-{cudnn_info}-devel-{os_info}"
+            DOCKER_BASE_IMAGE=f"nvidia/cuda:{cuda_info}-{cudnn_info}-devel-{os_info}"
         )
     else:
         # Only Support Ubuntu
